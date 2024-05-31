@@ -1,0 +1,23 @@
+name: demo_1_workflow
+run-name: ${{ github.actor }} is learning GitHub Actions
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build_job1:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Run hello
+        run: |
+          echo "I want to say hello to github action"
+          date
+
+      - name: Run end 
+        run: |
+          echo "This is ending"
+          date
