@@ -1,5 +1,4 @@
 name: demo_1_workflow
-run-name: ${{ github.actor }} is learning GitHub Actions
 on:
   push:
     branches: [ main ]
@@ -17,7 +16,21 @@ jobs:
           echo "I want to say hello to github action"
           date
 
-      - name: Run end 
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.9'
+
+      - name: Run python script
+        run: python main.py
+
+  build_job2:
+    runs-on: windows-latest
+    steps:
+      - name: Run hi
         run: |
-          echo "This is ending"
+          echo "I want to say hi to github action"
           date
