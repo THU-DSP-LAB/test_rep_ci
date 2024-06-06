@@ -8,7 +8,7 @@ on:
 
 jobs:
   build_job1:
-    runs-on: ubuntu-latest
+    runs-on: sw-001
 
     steps:
       - name: Run hello
