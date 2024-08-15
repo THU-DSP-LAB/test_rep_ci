@@ -1,36 +1,78 @@
-name: demo_1_workflow
+name: Build VENTUS
+env:
+  POCL: pocl
+  OCL_ICD: ocl-icd
+  RODINIA: gpu-rodinia
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  schedule:
+    - cron: '0 2 * * *' # Runs at 2am everyday
   workflow_dispatch:
-
 jobs:
-  build_job1:
+  build:
     runs-on: self-hosted
-
     steps:
-      - name: Run hello
+
+      - name: Checkout CI_repo
+        uses: actions/checkout@v4
+        with:
+          path: test_rep_ci
+
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          registry-url: 'https://registry.npmjs.org'
+
+
+      - name: Install Ninja
+        uses: llvm/actions/install-ninja@main
+
+      - name: Install Other needed packages # maybe install llvm release is a better choice
         run: |
-          echo "I want to say hello to github action"
-          date
+          sudo apt-get install -y \
+          device-tree-compiler \
+          bsdmainutils \
+          ccache
 
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: List files in workspace
+        run: ls ${{ github.workspace }}
 
-          #      - name: Set up Python 3.9
-          #        uses: actions/setup-python@v3
-          #        with:
-          #          python-version: '3.9'
+      - name: Create a new file in workspace
+        run: echo "Hello World" > ${{ github.workspace }}/newfile.txt
 
-      - name: Run python script
-        run: python3 main.py
+      - name: checkout pocl
+        uses: actions/checkout@v4
+        with:
+          repository: THU-DSP-LAB/pocl
+          path: pocl
 
-  build_job2:
-    runs-on: windows-latest
-    steps:
-      - name: Run hi
+      - name: checkout ocl-icd
+        uses: actions/checkout@v4
+        with:
+          repository: OCL-dev/ocl-icd
+          path: ocl-icd
+
+      - name: checkout rodinia
+        uses: actions/checkout@v4
+        with:
+          repository: THU-DSP-LAB/gpu-rodinia
+          path: gpu-rodinia
+
+      - name: download data 
         run: |
-          echo "I want to say hi to github action"
-          date
+          wget -P ${{github.workspace}}/$RODINIA -c https://www.dropbox.com/s/cc6cozpboht3mtu/rodinia-3.1-data.tar.gz
+          tar -zxvf ${{github.workspace}}/$RODINIA/rodinia-3.1-data.tar.gz -C ${{github.workspace}}/$RODINIA
+          mv ${{github.workspace}}/$RODINIA/rodinia-data/* ${{github.workspace}}/$RODINIA/data/
+          rm ${{github.workspace}}/$RODINIA/rodinia-3.1-data.tar.gz
+          rm ${{github.workspace}}/$RODINIA/rodinia-data -rf
+
+      - name: test cd repo
+        run: |
+          cd $RODINIA
+          mkdir kl_log
+          # Later need to add test files and test script for testing
+          echo "Test files and scripts will be added later"
